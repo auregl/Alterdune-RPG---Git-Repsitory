@@ -204,6 +204,11 @@ bool Combat::doMercy() {
     player.addSpare();
     return true;
 }
+// ─── Calcul degats de base ────────────────────────────────────────────────────
+int Combat::calcDamage(int maxHp) {
+    uniform_int_distribution<int> dist(0, maxHp);
+    return dist(rng);
+}
 
 // ─── Multiplicateur aleatoire [0.0, 2.0] pour les degats du monstre ──────────
 float Combat::calcMultiplier() {

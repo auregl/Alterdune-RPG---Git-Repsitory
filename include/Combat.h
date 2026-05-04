@@ -28,6 +28,7 @@ private:
     void doAct();
     void menuItem();    // renomme pour clarifier : ouvre le menu item sans terminer le tour
     bool doMercy();
+    int  calcDamage(int maxHp);
     float calcMultiplier();
     void showStatus() const;
 };

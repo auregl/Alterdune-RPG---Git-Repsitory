@@ -44,7 +44,7 @@ void Game::start() {
 }
 
 void Game::mainMenu() {
-    clearScreen();
+    //clearScreen();
     displayMenu();
 
     while (true) {
@@ -115,7 +115,7 @@ void Game::startCombat() {
 
     if (won) {
         bestiary.add(m);
-        clearScreen();
+        //clearScreen();
         displayMenu();
         std::cout << "\n--- Combat ---\n";
         std::cout << "Victoire ! Total : "

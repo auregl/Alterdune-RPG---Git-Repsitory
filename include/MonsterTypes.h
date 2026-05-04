@@ -8,6 +8,7 @@ class NormalMonster : public Monster {
 public:
     NormalMonster(const string& name, int hp, int atk, int def,
                   int mercyGoal, const vector<int>& acts);
+    Monster* clone() const override;
     int getMaxActCount() const override;
 };
 
@@ -16,6 +17,7 @@ class MinibossMonster : public Monster {
 public:
     MinibossMonster(const string& name, int hp, int atk, int def,
                     int mercyGoal, const vector<int>& acts);
+    Monster* clone() const override;
     int getMaxActCount() const override;
 };
 
@@ -24,5 +26,6 @@ class BossMonster : public Monster {
 public:
     BossMonster(const string& name, int hp, int atk, int def,
                 int mercyGoal, const vector<int>& acts);
+    Monster* clone() const override;
     int getMaxActCount() const override;
 };

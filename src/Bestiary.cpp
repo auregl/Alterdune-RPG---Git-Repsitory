@@ -2,6 +2,9 @@
 #include <iostream>
 using namespace std;
 
+Bestiary::~Bestiary() {
+    for (Monster* m : defeatedMonsters) delete m;
+}
 
 void Bestiary::add(Monster* m) {
     defeatedMonsters.push_back(m);

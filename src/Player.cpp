@@ -25,6 +25,8 @@ void Player::addItem(Utilisable* item) {
 // ─── Equipe une arme depuis l'inventaire ──────────────────────────────────────
 // Le bonus ATK est applique pour le tour en cours (passe par reference depuis Combat)
 void Player::equiperArme(int index, int& bonusAtk) {
+    bonusAtk = 0;
+
     if (index < 0 || index >= (int)inventory.size()) {
         cout << "Index invalide.\n";
         return;
@@ -46,17 +48,17 @@ void Player::equiperArme(int index, int& bonusAtk) {
     }
 
     armeEquipee = a;
-    a->utiliser(); // consomme 1 charge de durabilite
     bonusAtk = a->getBonusAtk(); // remplace (pas de cumul)
 
-    cout << "Vous brandissez " << a->getName()
+    cout << "Vous equipez " << a->getName()
          << " ! (ATK +" << a->getBonusAtk()
-         << " ce tour | Durabilite : " << a->getDurabilite()
-         << "/" << a->getDurabilite() + 1 << ")\n"; // +1 car deja decremente
+         << " | Durabilite : " << a->getDurabilite() << ")\n";
 }
 
 // ─── Equipe une armure depuis l'inventaire ────────────────────────────────────
 void Player::equiperArmure(int index, int& bonusDef) {
+    bonusDef = 0;
+
     if (index < 0 || index >= (int)inventory.size()) {
         cout << "Index invalide.\n";
         return;
@@ -77,12 +79,11 @@ void Player::equiperArmure(int index, int& bonusDef) {
     }
 
     armureEquipee = e;
-    e->utiliser(); // consomme de l'usure
     bonusDef = e->getBonusDefPct(); // remplace (pas de cumul)
 
-    cout << "Vous activez " << e->getName()
+    cout << "Vous equipez " << e->getName()
          << " ! (DEF +" << e->getBonusDefPct()
-         << "% ce tour | Usure : " << e->getUsure()
+         << "% | Usure : " << e->getUsure()
          << "/" << e->getSeuilMax() << ")\n";
 }
 
@@ -112,6 +113,37 @@ bool Player::utiliserPotion(int index) {
     return true;
 }
 
+bool Player::useItem(int index, int& bonusAtk, int& bonusDef) {
+    bonusAtk = 0;
+    bonusDef = 0;
+
+    string type = getItemType(index);
+    if (type == "WEAPON") {
+        equiperArme(index, bonusAtk);
+        return true;
+    }
+    if (type == "ARMOR") {
+        equiperArmure(index, bonusDef);
+        return true;
+    }
+    if (type == "HEAL") {
+        return utiliserPotion(index);
+    }
+
+    cout << "Index invalide.\n";
+    return false;
+}
+
+int Player::getEquippedAtkBonus() const {
+    if (!armeEquipee || !armeEquipee->estDisponible()) return 0;
+    return armeEquipee->getBonusAtk();
+}
+
+int Player::getEquippedDefBonus() const {
+    if (!armureEquipee || !armureEquipee->estDisponible()) return 0;
+    return armureEquipee->getBonusDefPct();
+}
+
 // ─── Affichage inventaire ─────────────────────────────────────────────────────
 void Player::displayInventory() const {
     cout << "=== Inventaire ===\n";
@@ -121,9 +153,9 @@ void Player::displayInventory() const {
         inventory[i]->afficherDetails();
     }
     if (armeEquipee)
-        cout << "  [Arme equipee ce tour : " << armeEquipee->getName() << "]\n";
+        cout << "  [Arme equipee : " << armeEquipee->getName() << "]\n";
     if (armureEquipee)
-        cout << "  [Armure equipee ce tour : " << armureEquipee->getName() << "]\n";
+        cout << "  [Armure equipee : " << armureEquipee->getName() << "]\n";
 }
 
 // ─── Affichage stats ──────────────────────────────────────────────────────────

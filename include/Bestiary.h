@@ -10,6 +10,7 @@ private:
 
 public:
     Bestiary() = default;
+    ~Bestiary();
 
     void add(Monster* m);
     void display()   const;

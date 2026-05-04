@@ -28,6 +28,7 @@ public:
     void setKilledResult(bool v);
     void modifyMercy(int delta);
     bool isMercyFull() const;
+    virtual Monster* clone() const = 0;
 
     // Méthode purement virtuelle : polymorphisme sur le nb d'actions ACT
     virtual int getMaxActCount() const = 0;

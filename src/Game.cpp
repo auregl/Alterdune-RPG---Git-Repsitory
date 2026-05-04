@@ -1,13 +1,14 @@
 #include "Game.h"
-#include "FileLoader.h"
 #include "Combat.h"
+#include "FileLoader.h"
 
 #include <cstdlib>
 #include <iostream>
 #include <limits>
 #include <random>
+using namespace std;
 
-static std::mt19937 gameRng(std::random_device{}());
+static mt19937 gameRng(random_device{}());
 
 Game::Game() : player("???") {}
 
@@ -16,25 +17,25 @@ Game::~Game() {
 }
 
 void Game::start() {
-    std::cout << "=============================\n";
-    std::cout << "       ALTERDUNE v1.0        \n";
-    std::cout << "=============================\n";
+    cout << "=============================\n";
+    cout << "       ALTERDUNE v1.0        \n";
+    cout << "=============================\n";
 
-    std::string nom;
-    std::cout << "Entrez le nom de votre personnage : ";
-    std::getline(std::cin, nom);
+    string nom;
+    cout << "Entrez le nom de votre personnage : ";
+    getline(cin, nom);
     player = Player(nom);
 
     FileLoader::loadItems("data/items.csv", player);
     monsters = FileLoader::loadMonsters("data/monsters.csv");
 
     if (monsters.empty()) {
-        std::cerr << "[ERREUR] Aucun monstre charge. Verifiez monsters.csv.\n";
+        cerr << "[ERREUR] Aucun monstre charge. Verifiez monsters.csv.\n";
         return;
     }
 
-    std::cout << "\nBienvenue, " << player.getName() << " !\n";
-    std::cout << "HP : " << player.getHp() << "/" << player.getHpMax() << "\n";
+    cout << "\nBienvenue, " << player.getName() << " !\n";
+    cout << "HP : " << player.getHp() << "/" << player.getHpMax() << "\n";
     player.displayInventory();
 
     mainMenu();
@@ -45,37 +46,37 @@ void Game::mainMenu() {
     displayMenu();
 
     while (true) {
-        std::cout << "> ";
+        cout << "> ";
 
         int choice = 0;
-        std::cin >> choice;
-        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        cin >> choice;
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
         clearScreen();
         displayMenu();
 
         switch (choice) {
             case 1:
-                std::cout << "\n--- Combat ---\n";
+                cout << "\n--- Combat ---\n";
                 startCombat();
                 break;
             case 2:
-                std::cout << "\n--- Bestiaire ---\n";
+                cout << "\n--- Bestiaire ---\n";
                 showBestiary();
                 break;
             case 3:
-                std::cout << "\n--- Statistiques ---\n";
+                cout << "\n--- Statistiques ---\n";
                 showStats();
                 break;
             case 4:
-                std::cout << "\n--- Items ---\n";
+                cout << "\n--- Items ---\n";
                 showItems();
                 break;
             case 5:
-                std::cout << "Au revoir !\n";
+                cout << "Au revoir !\n";
                 return;
             default:
-                std::cout << "Choix invalide.\n";
+                cout << "Choix invalide.\n";
                 break;
         }
 
@@ -88,39 +89,41 @@ void Game::mainMenu() {
 
 void Game::clearScreen() const {
 #ifdef _WIN32
-    std::system("cls");
+    system("cls");
 #else
-    std::system("clear");
+    system("clear");
 #endif
 }
 
 void Game::displayMenu() const {
-    std::cout << "=== Menu principal ===\n";
-    std::cout << "[1] Demarrer un combat\n";
-    std::cout << "[2] Bestiaire\n";
-    std::cout << "[3] Statistiques\n";
-    std::cout << "[4] Items\n";
-    std::cout << "[5] Quitter\n";
+    cout << "=== Menu principal ===\n";
+    cout << "[1] Demarrer un combat\n";
+    cout << "[2] Bestiaire\n";
+    cout << "[3] Statistiques\n";
+    cout << "[4] Items\n";
+    cout << "[5] Quitter\n";
 }
 
 void Game::startCombat() {
-    std::uniform_int_distribution<int> dist(0, static_cast<int>(monsters.size()) - 1);
-    Monster* m = monsters[dist(gameRng)];
+    uniform_int_distribution<int> dist(0, static_cast<int>(monsters.size()) - 1);
+    Monster* modele = monsters[dist(gameRng)];
+    Monster* combatant = modele->clone();
 
-    Combat combat(player, *m, catalog);
+    Combat combat(player, *combatant, catalog);
     bool won = combat.run();
 
     if (won) {
-        bestiary.add(m);
+        bestiary.add(combatant);
         clearScreen();
         displayMenu();
-        std::cout << "\n--- Combat ---\n";
-        std::cout << "Victoire ! Total : "
-                  << (player.getKills() + player.getSpared()) << "/10\n";
+        cout << "\n--- Combat ---\n";
+        cout << "Victoire ! Total : "
+             << (player.getKills() + player.getSpared()) << "/10\n";
     } else {
-        std::cout << "Defaite. La partie est terminee.\n";
+        delete combatant;
+        cout << "Defaite. La partie est terminee.\n";
         displayEnding();
-        std::exit(0);
+        exit(0);
     }
 }
 
@@ -134,15 +137,27 @@ void Game::showStats() {
 
 void Game::showItems() {
     player.displayInventory();
-    std::cout << "Utiliser un item ? (index ou -1 pour annuler) > ";
+    cout << "Utiliser un item ? (index ou -1 pour annuler) > ";
 
-    int idx;
-    std::cin >> idx;
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    int idx = -1;
+    cin >> idx;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-    int dummyAtk = 0;
-    int dummyDef = 0;
-    if (idx >= 0) player.menueItem(idx, player, dummyAtk, dummyDef);
+    if (idx < 0) {
+        cout << "Annule.\n";
+        return;
+    }
+
+    int bonusAtk = 0;
+    int bonusDef = 0;
+    if (player.useItem(idx, bonusAtk, bonusDef)) {
+        if (bonusAtk > 0) {
+            cout << "L'arme equipee sera prise en compte au prochain combat.\n";
+        }
+        if (bonusDef > 0) {
+            cout << "L'armure equipee sera prise en compte au prochain combat.\n";
+        }
+    }
 }
 
 bool Game::checkEndGame() const {
@@ -153,15 +168,15 @@ void Game::displayEnding() const {
     int k = player.getKills();
     int s = player.getSpared();
 
-    std::cout << "\n==============================\n";
+    cout << "\n==============================\n";
     if (k == 0 && s > 0) {
-        std::cout << "  FIN PACIFISTE\n  Vous n'avez tue personne.\n";
+        cout << "  FIN PACIFISTE\n  Vous n'avez tue personne.\n";
     } else if (s == 0 && k > 0) {
-        std::cout << "  FIN GENOCIDAIRE\n  Aucune pitie.\n";
+        cout << "  FIN GENOCIDAIRE\n  Aucune pitie.\n";
     } else {
-        std::cout << "  FIN NEUTRE\n  Tues : " << k << " | Epargnes : " << s << "\n";
+        cout << "  FIN NEUTRE\n  Tues : " << k << " | Epargnes : " << s << "\n";
     }
 
-    std::cout << "==============================\n";
-    std::cout << "Merci d'avoir joue a ALTERDUNE !\n";
+    cout << "==============================\n";
+    cout << "Merci d'avoir joue a ALTERDUNE !\n";
 }

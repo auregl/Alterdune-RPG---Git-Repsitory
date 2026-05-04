@@ -31,6 +31,7 @@ public:
     void equiperArmure(int index, int& bonusDef);
     // Utilise une potion de l'inventaire
     bool utiliserPotion(int index);
+    bool useItem(int index, int& bonusAtk, int& bonusDef);
 
     // Pour l'affichage de l'inventaire + slots equipes
     void displayInventory() const;
@@ -39,6 +40,8 @@ public:
     // Acces aux slots equipes (pour Combat)
     Arme*       getArmeEquipee()    const { return armeEquipee; }
     Equipement* getArmureEquipee()  const { return armureEquipee; }
+    int         getEquippedAtkBonus() const;
+    int         getEquippedDefBonus() const;
 
     // Retourne le type de l'item a l'index donne ("HEAL", "WEAPON", "ARMOR", "" si invalide)
     string getItemType(int index) const {

@@ -1,0 +1,29 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build ALTERDUNE",
+            "type": "shell",
+            "command": "g++",
+            "args": [
+                "-std=c++17", "-Wall", "-Iinclude",
+                "src/main.cpp",
+                "src/Entity.cpp",
+                "src/Item.cpp",
+                "src/ActAction.cpp",
+                "src/ActCatalog.cpp",
+                "src/Monster.cpp",
+                "src/MonsterTypes.cpp",
+                "src/Player.cpp",
+                "src/Bestiary.cpp",
+                "src/FileLoader.cpp",
+                "src/Combat.cpp",
+                "src/Game.cpp",
+                "-o", "alterdune.exe"
+            ],
+            "group": { "kind": "build", "isDefault": true },
+            "options": { "cwd": "${workspaceFolder}" },
+            "problemMatcher": ["$gcc"]
+        }
+    ]
+}

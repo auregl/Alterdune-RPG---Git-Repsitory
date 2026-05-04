@@ -142,7 +142,7 @@ void Game::showItems() {
 
     int dummyAtk = 0;
     int dummyDef = 0;
-    if (idx >= 0) player.useItem(idx, player, dummyAtk, dummyDef);
+    if (idx >= 0) player.menueItem(idx, player, dummyAtk, dummyDef);
 }
 
 bool Game::checkEndGame() const {

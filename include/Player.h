@@ -22,7 +22,7 @@ public:
 
     void addItem(Utilisable* item);
 
-    // bonusAtk et bonusDef sont modifies directement par Combat (option B)
+    // bonusAtk et bonusDef sont modifies directement par Combat
     bool useItem(int index, Player& player, int& bonusAtk, int& bonusDef);
 
     void displayInventory() const;

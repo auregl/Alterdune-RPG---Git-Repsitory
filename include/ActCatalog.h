@@ -31,4 +31,7 @@ enum ActId {
     REASON        = 8,
     DANCE         = 9,
     TAUNT         = 10,  // impact négatif
+    SING          = 11,
+    BRAG          = 12,
+    APOLOGIZE     = 13,
 };

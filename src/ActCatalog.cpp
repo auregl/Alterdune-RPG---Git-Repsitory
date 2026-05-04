@@ -56,8 +56,8 @@ ActCatalog::ActCatalog() {
             "Vous faites des grimaces. Le monstre se met en colère.",
             -20));   // impact NÉGATIF
             
-    actions.emplace(SING,
-        ActAction(SING,
+    actions.emplace(CHANT,
+        ActAction(CHANT,
             "Vous entonnez une chanson. Le monstre marque la mesure du pied malgré lui.",
             +20));
 

@@ -4,6 +4,7 @@
 #include "ActCatalog.h"
 using namespace std;
 
+
 class Combat {
 private:
     Player&     player;
@@ -27,4 +28,5 @@ private:
     bool doMercy();
     int  calcDamage(int maxHp);
     void showStatus() const;
+    void handleDrops();     // roll les drops et les transfère au joueur
 };

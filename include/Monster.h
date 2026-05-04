@@ -6,14 +6,13 @@
 using namespace std;
 
 
-// ─── Drop : item généré + probabilité ────────────────────────────────────────
+// ─── Drop : item candidat + probabilité ──────────────────────────────────────
 struct Drop {
-    Utilisable* item;      // ownership transmis au joueur si le roll réussit
-    int         chancePct; // 0–100
+    Utilisable* item;
+    int         chancePct;
 };
 
 
-// Classe abstraite : ne peut pas être instanciée directement
 class Monster : public Entity {
 protected:
     string      category;
@@ -37,9 +36,12 @@ public:
     void modifyMercy(int delta);
     bool isMercyFull() const;
 
-    // Roule les drops selon la catégorie du monstre.
-    // Retourne uniquement les items dont le roll a réussi (ownership à l'appelant).
-    vector<Utilisable*> rollDrops() const;
+    // Reçoit les pools globaux d'items (non-owning).
+    // Retourne les items droppés (ownership transféré à l'appelant).
+    vector<Utilisable*> rollDrops(
+        const vector<Utilisable*>& healPool,
+        const vector<Utilisable*>& weaponPool,
+        const vector<Utilisable*>& armorPool) const;
 
     virtual int getMaxActCount() const = 0;
 };

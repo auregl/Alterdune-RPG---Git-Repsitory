@@ -3,6 +3,7 @@
 #include "Bestiary.h"
 #include "ActCatalog.h"
 #include "Monster.h"
+#include "FileLoader.h"
 #include <vector>
 using namespace std;
 
@@ -10,15 +11,18 @@ using namespace std;
 class Game {
 private:
     Player               player;
-    vector<Monster*> monsters;
+    vector<Monster*>     monsters;
     Bestiary             bestiary;
     ActCatalog           catalog;
+    ItemPools            itemPools;   // pools globaux pour les drops
 
 public:
     Game();
-    ~Game(); // libère les monstres alloués dynamiquement
+    ~Game();
 
     void start();
+
+    const ItemPools& getItemPools() const { return itemPools; }
 
 private:
     void mainMenu();
@@ -28,6 +32,6 @@ private:
     void showBestiary();
     void showStats();
     void showItems();
-    bool checkEndGame() const; // true si 10 victoires atteintes
+    bool checkEndGame() const;
     void displayEnding() const;
 };

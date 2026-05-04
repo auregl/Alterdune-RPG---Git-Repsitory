@@ -1,6 +1,7 @@
 #include "Monster.h"
 #include <algorithm>
 #include <random>
+#include <iostream>
 using namespace std;
 
 static mt19937 dropRng(random_device{}());
@@ -28,50 +29,62 @@ bool Monster::isMercyFull() const {
 }
 
 // ─── rollDrops ────────────────────────────────────────────────────────────────
+// Tous les items du CSV peuvent dropper.
+// On pioche aléatoirement dans chaque pool, avec des chances selon la catégorie.
 //
-//  NORMAL   : 1 slot
-//    - Herbe du désert  (HEAL  5 HP  x3)   60 %
+//  NORMAL   : 1 HEAL  (50%)
 //
-//  MINIBOSS : 2 slots
-//    - Potion de sable  (HEAL 15 HP  x1)   70 %
-//    - Gourdin de pierre(ATK +6  dur 3)    45 %
+//  MINIBOSS : 1 HEAL  (70%)
+//             1 WEAPON (45%)
 //
-//  BOSS     : 3 slots
-//    - Elixir nomade        (HEAL 20 HP x1)  100 % garanti
-//    - Lance solaire        (ATK +10  dur 2)   65 %
-//    - Plastron des anciens (DEF +25 %)        55 %
+//  BOSS     : 1 HEAL   (100% garanti)
+//             1 WEAPON  (65%)
+//             1 ARMOR   (55%)
 //
-// Les items dont le roll échoue sont delete-és ici (pas de fuite mémoire).
+// Pour chaque slot : on tire un item aléatoire dans le pool correspondant,
+// puis on roll sa chance. Si succès → copie instanciée donnée au joueur.
+// Les pools passés en paramètre sont non-owning (Game en est propriétaire).
 
-vector<Utilisable*> Monster::rollDrops() const {
-    uniform_int_distribution<int> pct(1, 100);
+static Utilisable* cloneItem(const Utilisable* src) {
+    // Recrée un item identique (nouvel objet, ownership à l'appelant)
+    if (const Potion* p = dynamic_cast<const Potion*>(src))
+        return new Potion(p->getName(), p->getValeurSoin(), p->getQuantite());
+    if (const Arme* a = dynamic_cast<const Arme*>(src))
+        return new Arme(a->getName(), a->getBonusAtk(), a->getDurabilite());
+    if (const Equipement* e = dynamic_cast<const Equipement*>(src))
+        return new Equipement(e->getName(), e->getBonusDefPct(), e->getSeuilMax());
+    return nullptr;
+}
+
+static Utilisable* tryDrop(const vector<Utilisable*>& pool, int chancePct) {
+    if (pool.empty()) return nullptr;
+    uniform_int_distribution<int> pickDist(0, (int)pool.size() - 1);
+    uniform_int_distribution<int> pctDist(1, 100);
+    if (pctDist(dropRng) <= chancePct)
+        return cloneItem(pool[pickDist(dropRng)]);
+    return nullptr;
+}
+
+vector<Utilisable*> Monster::rollDrops(
+    const vector<Utilisable*>& healPool,
+    const vector<Utilisable*>& weaponPool,
+    const vector<Utilisable*>& armorPool) const
+{
     vector<Utilisable*> result;
-    vector<Drop> pool;
+    Utilisable* dropped = nullptr;
 
     if (category == "NORMAL") {
-        pool = {
-            { new Potion("Herbe du désert", 5, 3), 60 }
-        };
+        dropped = tryDrop(healPool, 50);
+        if (dropped) result.push_back(dropped);
     }
     else if (category == "MINIBOSS") {
-        pool = {
-            { new Potion("Potion de sable",  15, 1), 70 },
-            { new Arme("Gourdin de pierre",   6, 3), 45 }
-        };
+        dropped = tryDrop(healPool,   70); if (dropped) result.push_back(dropped);
+        dropped = tryDrop(weaponPool, 45); if (dropped) result.push_back(dropped);
     }
     else if (category == "BOSS") {
-        pool = {
-            { new Potion("Elixir nomade",            20, 1), 100 },
-            { new Arme("Lance solaire",              10, 2),  65 },
-            { new Equipement("Plastron des anciens", 25, 80), 55 }
-        };
-    }
-
-    for (Drop& d : pool) {
-        if (pct(dropRng) <= d.chancePct)
-            result.push_back(d.item);
-        else
-            delete d.item;
+        dropped = tryDrop(healPool,   100); if (dropped) result.push_back(dropped);
+        dropped = tryDrop(weaponPool,  65); if (dropped) result.push_back(dropped);
+        dropped = tryDrop(armorPool,   55); if (dropped) result.push_back(dropped);
     }
 
     return result;

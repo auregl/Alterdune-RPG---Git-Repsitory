@@ -13,6 +13,9 @@ Game::Game() : player("???") {}
 
 Game::~Game() {
     for (Monster* m : monsters) delete m;
+    for (Utilisable* u : itemPools.heals)   delete u;
+    for (Utilisable* u : itemPools.weapons) delete u;
+    for (Utilisable* u : itemPools.armors)  delete u;
 }
 
 void Game::start() {
@@ -25,11 +28,11 @@ void Game::start() {
     std::getline(std::cin, nom);
     player = Player(nom);
 
-    FileLoader::loadItems("data/items.csv", player);
-    monsters = FileLoader::loadMonsters("data/monsters.csv");
+    itemPools = FileLoader::loadItems("data/items.csv", player);
+    monsters  = FileLoader::loadMonsters("data/monsters.csv");
 
     if (monsters.empty()) {
-        std::cerr << "[ERREUR] Aucun monstre charge. Verifiez monsters.csv.\n";
+        std::cerr << "[ERREUR] Aucun monstre chargé. Vérifiez monsters.csv.\n";
         return;
     }
 
@@ -96,7 +99,7 @@ void Game::clearScreen() const {
 
 void Game::displayMenu() const {
     std::cout << "=== Menu principal ===\n";
-    std::cout << "[1] Demarrer un combat\n";
+    std::cout << "[1] Démarrer un combat\n";
     std::cout << "[2] Bestiaire\n";
     std::cout << "[3] Statistiques\n";
     std::cout << "[4] Items\n";
@@ -107,7 +110,7 @@ void Game::startCombat() {
     std::uniform_int_distribution<int> dist(0, static_cast<int>(monsters.size()) - 1);
     Monster* m = monsters[dist(gameRng)];
 
-    Combat combat(player, *m, catalog);
+    Combat combat(player, *m, catalog, itemPools);
     bool won = combat.run();
 
     if (won) {
@@ -118,19 +121,14 @@ void Game::startCombat() {
         std::cout << "Victoire ! Total : "
                   << (player.getKills() + player.getSpared()) << "/10\n";
     } else {
-        std::cout << "Defaite. La partie est terminee.\n";
+        std::cout << "Défaite. La partie est terminée.\n";
         displayEnding();
         std::exit(0);
     }
 }
 
-void Game::showBestiary() {
-    bestiary.display();
-}
-
-void Game::showStats() {
-    player.displayStats();
-}
+void Game::showBestiary()  { bestiary.display(); }
+void Game::showStats()     { player.displayStats(); }
 
 void Game::showItems() {
     player.displayInventory();
@@ -140,8 +138,7 @@ void Game::showItems() {
     std::cin >> idx;
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-    int dummyAtk = 0;
-    int dummyDef = 0;
+    int dummyAtk = 0, dummyDef = 0;
     if (idx >= 0) player.useItem(idx, player, dummyAtk, dummyDef);
 }
 
@@ -154,14 +151,13 @@ void Game::displayEnding() const {
     int s = player.getSpared();
 
     std::cout << "\n==============================\n";
-    if (k == 0 && s > 0) {
-        std::cout << "  FIN PACIFISTE\n  Vous n'avez tue personne.\n";
-    } else if (s == 0 && k > 0) {
-        std::cout << "  FIN GENOCIDAIRE\n  Aucune pitie.\n";
-    } else {
-        std::cout << "  FIN NEUTRE\n  Tues : " << k << " | Epargnes : " << s << "\n";
-    }
+    if (k == 0 && s > 0)
+        std::cout << "  FIN PACIFISTE\n  Vous n'avez tué personne.\n";
+    else if (s == 0 && k > 0)
+        std::cout << "  FIN GÉNOCIDAIRE\n  Aucune pitié.\n";
+    else
+        std::cout << "  FIN NEUTRE\n  Tués : " << k << " | Épargnés : " << s << "\n";
 
     std::cout << "==============================\n";
-    std::cout << "Merci d'avoir joue a ALTERDUNE !\n";
+    std::cout << "Merci d'avoir joué à ALTERDUNE !\n";
 }

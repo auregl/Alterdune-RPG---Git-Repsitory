@@ -6,9 +6,10 @@ using namespace std;
 
 static mt19937 rng(random_device{}());
 
-Combat::Combat(Player& player, Monster& monster, ActCatalog& catalog)
+Combat::Combat(Player& player, Monster& monster, ActCatalog& catalog,
+               const ItemPools& itemPools)
     : player(player), monster(monster), catalog(catalog),
-      bonusAtkTour(0), bonusDefTour(0) {}
+      itemPools(itemPools), bonusAtkTour(0), bonusDefTour(0) {}
 
 // ─── Boucle principale ────────────────────────────────────────────────────────
 bool Combat::run() {
@@ -52,27 +53,29 @@ bool Combat::run() {
 
 // ─── Drops ────────────────────────────────────────────────────────────────────
 void Combat::handleDrops() {
-    vector<Utilisable*> drops = monster.rollDrops();
+    vector<Utilisable*> drops = monster.rollDrops(
+        itemPools.heals, itemPools.weapons, itemPools.armors);
+
+    cout << "\n[ Butin de " << monster.getName() << " ]\n";
 
     if (drops.empty()) {
-        cout << monster.getName() << " n'a rien laissé tomber.\n";
+        cout << "  Le monstre n'a rien laissé tomber.\n";
         return;
     }
 
-    cout << "\n[ " << monster.getName() << " a laissé tomber : ]\n";
     for (Utilisable* item : drops) {
-        cout << "  + ";
+        cout << "  + Vous obtenez : ";
         item->afficherDetails();
         player.addItem(item);
     }
+    cout << "  -> Ajouté(s) à votre inventaire !\n";
 }
 
 // ─── Tour du joueur ───────────────────────────────────────────────────────────
 bool Combat::playerTurn() {
-    if (bonusAtkTour > 0 || bonusDefTour > 0) {
+    if (bonusAtkTour > 0 || bonusDefTour > 0)
         cout << "  [Bonus ce tour : ATK +" << bonusAtkTour
              << " | DEF +" << bonusDefTour << "%]\n";
-    }
 
     cout << "\n  FIGHT    ACT    ITEM    MERCY\n";
     cout << "  [1]      [2]    [3]     [4]\n> ";
@@ -125,8 +128,7 @@ bool Combat::fight() {
     else {
         cout << "Vous infligez " << dmgTotal << " dégâts";
         if (bonusAtkTour > 0)
-            cout << " (" << dmgBase << " aléatoire + "
-                 << bonusAtkTour << " (ATK bonus))";
+            cout << " (" << dmgBase << " aléatoire + " << bonusAtkTour << " (ATK bonus))";
         cout << " à " << monster.getName() << ".\n";
         cout << monster.getName() << " HP : " << monster.getHp()
              << "/" << monster.getHpMax() << "\n";
@@ -182,11 +184,9 @@ void Combat::useItem() {
     player.useItem(idx, player, bonusAtkTour, bonusDefTour);
 
     if (bonusAtkTour > atkAvant)
-        cout << "  -> Bonus ATK +" << (bonusAtkTour - atkAvant)
-             << " actif pour ce tour !\n";
+        cout << "  -> Bonus ATK +" << (bonusAtkTour - atkAvant) << " actif pour ce tour !\n";
     if (bonusDefTour > defAvant)
-        cout << "  -> Bonus DEF +" << (bonusDefTour - defAvant)
-             << "% actif pour ce tour !\n";
+        cout << "  -> Bonus DEF +" << (bonusDefTour - defAvant) << "% actif pour ce tour !\n";
 }
 
 // ─── MERCY ────────────────────────────────────────────────────────────────────

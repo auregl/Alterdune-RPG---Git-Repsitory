@@ -2,19 +2,23 @@
 #include "Player.h"
 #include "Monster.h"
 #include "ActCatalog.h"
+#include "FileLoader.h"
 using namespace std;
+
 
 class Combat {
 private:
-    Player&     player;
-    Monster&    monster;
-    ActCatalog& catalog;
+    Player&           player;
+    Monster&          monster;
+    ActCatalog&       catalog;
+    const ItemPools&  itemPools;   // référence aux pools globaux (non-owning)
 
-    int bonusAtkTour;   // bonus ATK actif uniquement ce tour (Arme)
-    int bonusDefTour;   // bonus DEF% actif uniquement ce tour (Equipement)
+    int bonusAtkTour;
+    int bonusDefTour;
 
 public:
-    Combat(Player& player, Monster& monster, ActCatalog& catalog);
+    Combat(Player& player, Monster& monster, ActCatalog& catalog,
+           const ItemPools& itemPools);
 
     bool run();
 
@@ -31,4 +35,5 @@ private:
     int  calcDamage(int maxHp);
     float calcMultiplier();
     void showStatus() const;
+    void handleDrops();
 };

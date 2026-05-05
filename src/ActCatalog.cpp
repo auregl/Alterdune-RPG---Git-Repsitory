@@ -55,6 +55,21 @@ ActCatalog::ActCatalog() {
         ActAction(TAUNT,
             "Vous faites des grimaces. Le monstre se met en colère.",
             -20));   // impact NÉGATIF
+            
+    actions.emplace(CHANT,
+        ActAction(CHANT,
+            "Vous entonnez une chanson. Le monstre marque la mesure du pied malgré lui.",
+            +20));
+
+    actions.emplace(BRAG,
+        ActAction(BRAG,
+            "Vous vous vantez de vos exploits. Le monstre lève les yeux au ciel... mais est impressionné.",
+            +10));
+
+    actions.emplace(APOLOGIZE,
+        ActAction(APOLOGIZE,
+            "Vous présentez vos excuses sincèrement. Le monstre semble déstabilisé.",
+            +25));
 }
 
 const ActAction* ActCatalog::getAction(int id) const {

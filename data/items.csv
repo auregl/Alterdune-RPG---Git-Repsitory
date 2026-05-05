@@ -1,8 +1,17 @@
-HEAL;Potion;15;3
-HEAL;Snack;8;5
+HEAL;Snack;8;3
+HEAL;Potion de sable;15;2
 HEAL;SuperPotion;30;1
-WEAPON;Epee de sable;8;3
+HEAL;Herbe du désert;5;5
+HEAL;Elixir nomade;20;1
+HEAL;Baume runique;12;2
+WEAPON;Dague rouillée;4;4
+WEAPON;Épée de sable;8;3
 WEAPON;Arc des dunes;6;4
 WEAPON;Hache runique;12;1
+WEAPON;Lance solaire;10;2
+WEAPON;Gourdin de pierre;6;3
+ARMOR;Cape du voyageur;10;80
 ARMOR;Bouclier nomade;20;80
 ARMOR;Armure en fer;30;80
+ARMOR;Plastron des anciens;25;80
+ARMOR;Tunique de cuir;15;80

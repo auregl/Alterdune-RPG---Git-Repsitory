@@ -181,7 +181,7 @@ void Combat::doAct() {
          << monster.getMercy() << "/" << monster.getMercyGoal() << "\n";
 }
 
-// ─── ITEM : ne consomme pas le tour ──────────────────────────────────────────
+// ─── ITEM consomme pas le tour ──────────────────────────────────────────
 void Combat::menuItem() {
     player.displayInventory();
     cout << "Choisir un item (index, -1 pour annuler) > ";

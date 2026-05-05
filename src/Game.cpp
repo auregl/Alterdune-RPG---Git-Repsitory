@@ -97,7 +97,7 @@ void Game::displayMenu() const {
 // ─── Combat ──────────────────────────────────────────────────────────────────
 // On clone le monstre pour que les monstres originaux restent intacts
 // et puissent etre rencontres plusieurs fois. Le clone est transfere
-// au Bestiary (qui en prend ownership) en cas de victoire, ou delete sinon.
+// au Bestiary en cas de victoire, ou delete sinon.
 void Game::startCombat() {
     uniform_int_distribution<int> dist(0, static_cast<int>(monsters.size()) - 1);
     Monster* modele    = monsters[dist(gameRng)];

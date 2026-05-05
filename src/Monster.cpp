@@ -28,7 +28,7 @@ bool Monster::isMercyFull() const {
     return mercy >= mercyGoal;
 }
 
-// ─── rollDrops ────────────────────────────────────────────────────────────────
+// ─── rollDrops (non fini)────────────────────────────────────────────────────────────────
 // Tous les items du CSV peuvent dropper.
 // On pioche aléatoirement dans chaque pool, avec des chances selon la catégorie.
 //

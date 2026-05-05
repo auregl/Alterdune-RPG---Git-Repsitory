@@ -4,8 +4,8 @@ using namespace std;
 
 
 ActCatalog::ActCatalog() {
-    // ── 8 actions minimum requises, dont 2 à impact négatif ──────────────────
-    // Format : ActAction(id, "texte affiché", impactMercy)
+    // ──  actions  ──────────────────
+    
     actions.emplace(JOKE,
         ActAction(JOKE,
             "Vous racontez une blague sur les sables mouvants... le monstre rigole nerveusement.",
@@ -19,7 +19,7 @@ ActCatalog::ActCatalog() {
     actions.emplace(INSULT,
         ActAction(INSULT,
             "Vous insultez l'ancêtre du monstre. L'ambiance se détériore fortement.",
-            -30));   // impact NÉGATIF
+            -30));   
 
     actions.emplace(DISCUSS,
         ActAction(DISCUSS,
@@ -54,7 +54,7 @@ ActCatalog::ActCatalog() {
     actions.emplace(TAUNT,
         ActAction(TAUNT,
             "Vous faites des grimaces. Le monstre se met en colère.",
-            -20));   // impact NÉGATIF
+            -20));   
             
     actions.emplace(CHANT,
         ActAction(CHANT,

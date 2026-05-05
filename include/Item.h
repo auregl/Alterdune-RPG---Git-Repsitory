@@ -4,12 +4,10 @@
 #include <random>
 using namespace std;
 
-// ─── Générateur aléatoire partagé ────────────────────────────────────────────
+//Générateur aléatoire partagé 
 mt19937& itemRng();
 
-// =============================================================================
-//  CLASSE DE BASE : Utilisable  (interface polymorphe)
-// =============================================================================
+//  CLASSE DE BASE : Utilisable  (en polymorphe)
 class Utilisable {
 protected:
     string name;
@@ -27,9 +25,7 @@ public:
     virtual bool estDisponible()     const = 0;
 };
 
-// =============================================================================
 //  POTION  — soigne des HP, quantite limitee
-// =============================================================================
 class Potion : public Utilisable {
 private:
     int valeurSoin;
@@ -45,9 +41,7 @@ public:
     void afficherDetails()      const override;
 };
 
-// =============================================================================
-//  ARME  — augmente l'ATK, durabilite entre 1 et 4 utilisations
-// =============================================================================
+//  ARME  — augmente l'ATK, durabilite entre 1 et 4 utilisations a peu pres
 class Arme : public Utilisable {
 private:
     int bonusAtk;
@@ -64,9 +58,7 @@ public:
     void afficherDetails()      const override;
 };
 
-// =============================================================================
-//  EQUIPEMENT  — augmente la DEF (%), usure aleatoire entre 10 et 40 par usage
-// =============================================================================
+//  EQUIPEMENT  — augmente la DEF (%), usure aleatoire entre 10 et 40 par usage max
 class Equipement : public Utilisable {
 private:
     int bonusDefPct;

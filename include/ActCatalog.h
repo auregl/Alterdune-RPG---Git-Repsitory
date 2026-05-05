@@ -4,33 +4,30 @@
 using namespace std;
 
 
-// Catalogue de toutes les actions ACT disponibles dans le jeu (pré-défini dans le code)
 class ActCatalog {
 private:
     map<int, ActAction> actions;
 
 public:
-    ActCatalog();   // Remplit le catalogue avec les actions prédéfinies
+    ActCatalog(); 
 
     const ActAction* getAction(int id) const;
     bool             exists(int id)    const;
     void             displayAll()      const;
 };
 
-// ──────────────────────────────────────────────────────
 //  Identifiants des actions ACT (enum pour lisibilité)
-// ──────────────────────────────────────────────────────
 enum ActId {
     JOKE          = 1,
     COMPLIMENT    = 2,
-    INSULT        = 3,   // impact négatif
+    INSULT        = 3,   
     DISCUSS       = 4,
     OBSERVE       = 5,
     PET           = 6,
     OFFER_SNACK   = 7,
     REASON        = 8,
     DANCE         = 9,
-    TAUNT         = 10,  // impact négatif
+    TAUNT         = 10, 
     CHANT          = 11,
     BRAG          = 12,
     APOLOGIZE     = 13,

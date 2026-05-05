@@ -6,7 +6,7 @@ using namespace std;
 
 class Bestiary {
 private:
-    vector<Monster*> defeatedMonsters; // pointeurs non-owning (Game possède les monstres)
+    vector<Monster*> defeatedMonsters; // (Game possède les monstres)
 
 public:
     Bestiary() = default;

@@ -6,11 +6,11 @@
 using namespace std;
 
 
-// ─── Drop : item candidat + probabilité ──────────────────────────────────────
-struct Drop {
-    Utilisable* item;
-    int         chancePct;
-};
+
+//struct Drop {
+//    Utilisable* item;
+//    int         chancePct;
+//};
 
 
 class Monster : public Entity {
@@ -37,8 +37,7 @@ public:
     bool isMercyFull() const;
     virtual Monster* clone() const = 0;
 
-    // Reçoit les pools globaux d'items (non-owning).
-    // Retourne les items droppés (ownership transféré à l'appelant).
+
     vector<Utilisable*> rollDrops(
         const vector<Utilisable*>& healPool,
         const vector<Utilisable*>& weaponPool,

@@ -7,18 +7,18 @@ mt19937& itemRng() {
     return rng;
 }
 
-// =============================================================================
+
 //  Utilisable
-// =============================================================================
+
 Utilisable::Utilisable(const string& name, const string& type)
     : name(name), type(type) {}
 
 string Utilisable::getName() const { return name; }
 string Utilisable::getType() const { return type; }
 
-// =============================================================================
+
 //  Potion
-// =============================================================================
+
 Potion::Potion(const string& name, int soin, int qte)
     : Utilisable(name, "HEAL"), valeurSoin(soin), quantite(qte) {}
 
@@ -39,9 +39,9 @@ void Potion::afficherDetails() const {
          << " | Quantite : " << quantite << "\n";
 }
 
-// =============================================================================
+
 //  Arme
-// =============================================================================
+
 Arme::Arme(const string& name, int bonusAtk, int durabilite)
     : Utilisable(name, "WEAPON"),
       bonusAtk(bonusAtk), durabilite(durabilite), durabiliteMax(durabilite) {}
@@ -63,9 +63,9 @@ void Arme::afficherDetails() const {
          << " | Durabilite : " << durabilite << "/" << durabiliteMax << "\n";
 }
 
-// =============================================================================
+
 //  Equipement
-// =============================================================================
+
 Equipement::Equipement(const string& name, int bonusDefPct, int seuilMax)
     : Utilisable(name, "ARMOR"),
       bonusDefPct(bonusDefPct), usure(0), seuilMax(seuilMax) {}

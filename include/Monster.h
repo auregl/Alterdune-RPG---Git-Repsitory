@@ -37,7 +37,7 @@ public:
     bool isMercyFull() const;
     virtual Monster* clone() const = 0;
 
-
+// Pas utilisé pour l'instant 
     vector<Utilisable*> rollDrops(
         const vector<Utilisable*>& healPool,
         const vector<Utilisable*>& weaponPool,

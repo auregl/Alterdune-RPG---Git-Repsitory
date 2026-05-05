@@ -30,7 +30,7 @@ public:
     bool utiliserPotion(int index);
     bool useItem(int index, int& bonusAtk, int& bonusDef);
 
-    // Remet le slot a nullptr apres utilisation (l'item reste dans l'inventaire)
+    // Faut remettre le slot a nullptr apres utilisation
     void desequiperArme();
     void desequiperArmure();
 

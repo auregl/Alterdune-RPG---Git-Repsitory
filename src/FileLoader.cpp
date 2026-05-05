@@ -14,7 +14,10 @@ static mt19937 loaderRng(random_device{}());
 static string trim(const string& s) {
     size_t start = s.find_first_not_of(" \t\r\n");
     size_t end   = s.find_last_not_of(" \t\r\n");
-    return (start == string::npos) ? "" : s.substr(start, end - start + 1);
+    if (start == string::npos)
+        return "";
+
+    return s.substr(start, end - start + 1);
 }
 
 static int actNameToId(const string& name) {
@@ -28,6 +31,9 @@ static int actNameToId(const string& name) {
     if (name == "REASON")      return REASON;
     if (name == "DANCE")       return DANCE;
     if (name == "TAUNT")       return TAUNT;
+    if (name == "CHANT")       return CHANT;
+    if (name == "BRAG")        return BRAG;
+    if (name == "APOLOGIZE")   return APOLOGIZE;
     return -1;
 }
 

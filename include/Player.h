@@ -10,8 +10,8 @@ private:
     int spared;
     vector<Utilisable*> inventory;
 
-    Arme*       armeEquipee;    // slot unique : 1 arme à la fois
-    Equipement* armureEquipee;  // slot unique : 1 armure à la fois
+    Arme*       armeEquipee;
+    Equipement* armureEquipee;
 
 public:
     Player(const string& name);
@@ -25,25 +25,23 @@ public:
 
     void addItem(Utilisable* item);
 
-    // Equipe une arme (remplace l'existante, remet l'ancienne en inventaire)
     void equiperArme(int index, int& bonusAtk);
-    // Equipe une armure (remplace l'existante, remet l'ancienne en inventaire)
     void equiperArmure(int index, int& bonusDef);
-    // Utilise une potion de l'inventaire
     bool utiliserPotion(int index);
     bool useItem(int index, int& bonusAtk, int& bonusDef);
 
-    // Pour l'affichage de l'inventaire + slots equipes
+    // Remet le slot a nullptr apres utilisation (l'item reste dans l'inventaire)
+    void desequiperArme();
+    void desequiperArmure();
+
     void displayInventory() const;
     void displayStats()     const;
 
-    // Acces aux slots equipes (pour Combat)
-    Arme*       getArmeEquipee()    const { return armeEquipee; }
-    Equipement* getArmureEquipee()  const { return armureEquipee; }
+    Arme*       getArmeEquipee()      const { return armeEquipee; }
+    Equipement* getArmureEquipee()    const { return armureEquipee; }
     int         getEquippedAtkBonus() const;
     int         getEquippedDefBonus() const;
 
-    // Retourne le type de l'item a l'index donne ("HEAL", "WEAPON", "ARMOR", "" si invalide)
     string getItemType(int index) const {
         if (index < 0 || index >= (int)inventory.size()) return "";
         return inventory[index]->getType();

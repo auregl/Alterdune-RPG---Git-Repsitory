@@ -7,14 +7,12 @@
 #include <vector>
 using namespace std;
 
-
 class Game {
 private:
-    Player               player;
-    vector<Monster*>     monsters;
-    Bestiary             bestiary;
-    ActCatalog           catalog;
-    ItemPools            itemPools;   // pools globaux pour les drops
+    Player           player;
+    vector<Monster*> monsters;
+    Bestiary         bestiary;
+    ActCatalog       catalog;
 
 public:
     Game();
@@ -22,11 +20,8 @@ public:
 
     void start();
 
-    const ItemPools& getItemPools() const { return itemPools; }
-
 private:
     void mainMenu();
-    void clearScreen() const;
     void displayMenu() const;
     void startCombat();
     void showBestiary();

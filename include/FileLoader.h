@@ -5,18 +5,11 @@
 #include <string>
 using namespace std;
 
-
-struct ItemPools {
-    vector<Utilisable*> heals;
-    vector<Utilisable*> weapons;
-    vector<Utilisable*> armors;
-};
-
 class FileLoader {
 public:
-    // Charge tous les items, attribue le kit de départ au joueur,
-    // et retourne les 3 pools complets (Game en prend ownership).
-    static ItemPools loadItems(const string& path, Player& player);
+    // Charge les items depuis le CSV et attribue 3 potions, 2 armes, 2 armures
+    // aleatoires directement au joueur.
+    static void loadItems(const string& path, Player& player);
 
     static vector<Monster*> loadMonsters(const string& path);
 

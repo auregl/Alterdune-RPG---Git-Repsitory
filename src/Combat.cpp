@@ -1,7 +1,7 @@
 #include "Combat.h"
 #include <iostream>
-#include <limits>
 #include <random>
+#include <limits>
 using namespace std;
 
 static mt19937 rng(random_device{}());
@@ -10,6 +10,7 @@ Combat::Combat(Player& player, Monster& monster, ActCatalog& catalog)
     : player(player), monster(monster), catalog(catalog),
       bonusAtkTour(0), bonusDefTour(0) {}
 
+// ─── Boucle principale ────────────────────────────────────────────────────────
 bool Combat::run() {
     bonusAtkTour = 0;
     bonusDefTour = 0;
@@ -21,15 +22,34 @@ bool Combat::run() {
         showStatus();
 
         bool combatOver = playerTurn();
+
+        // Verifie si le monstre est mort (via fight())
         if (!monster.isAlive()) {
             monster.setKilledResult(true);
             player.addKill();
             cout << monster.getName() << " est vaincu !\n";
             return true;
         }
+
+        // combatOver sans mort du monstre = grace accordee
         if (combatOver) return true;
 
-        if (monsterTurn()) {
+        monsterTurn();
+
+        // L'arme et l'armure expirent en fin de tour
+        if (bonusAtkTour > 0) {
+            cout << "[Arme " << player.getArmeEquipee()->getName()
+                 << " desequipee (fin de tour).]\n";
+            player.desequiperArme();
+            bonusAtkTour = 0;
+        }
+        if (bonusDefTour > 0) {
+            cout << "[Armure desequipee (fin de tour).]\n";
+            player.desequiperArmure();
+            bonusDefTour = 0;
+        }
+
+        if (!player.isAlive()) {
             cout << "Vous etes mort. Fin de partie.\n";
             return false;
         }
@@ -38,12 +58,14 @@ bool Combat::run() {
     return false;
 }
 
+// ─── Tour du joueur ───────────────────────────────────────────────────────────
+// ITEM ne consomme pas le tour : la boucle reboucle jusqu'a FIGHT/ACT/MERCY.
 bool Combat::playerTurn() {
     while (true) {
         int atkBonus = player.getEquippedAtkBonus();
         int defBonus = player.getEquippedDefBonus();
         if (atkBonus > 0 || defBonus > 0) {
-            cout << "  [Equipement actif : ATK +" << atkBonus
+            cout << "  [Equipement actif ce tour : ATK +" << atkBonus
                  << " | DEF +" << defBonus << "%]\n";
         }
 
@@ -56,8 +78,8 @@ bool Combat::playerTurn() {
 
         switch (choice) {
             case 1: return fight();
-            case 2: doAct(); return false;
-            case 3: menuItem(); break;
+            case 2: doAct();     return false;
+            case 3: menuItem();  break;   // ne consomme pas le tour
             case 4: return doMercy();
             default:
                 cout << "Choix invalide.\n";
@@ -66,17 +88,22 @@ bool Combat::playerTurn() {
     }
 }
 
-bool Combat::monsterTurn() {
+// ─── Tour du monstre ──────────────────────────────────────────────────────────
+// Degats = atk * multiplicateur [0.0, 2.0]
+// < 0.3 : rate | > 1.7 : critique
+// L'armure absorbe une partie des degats et consomme de l'usure.
+void Combat::monsterTurn() {
     bonusDefTour = player.getEquippedDefBonus();
-    Equipement* armure = player.getArmureEquipee();
-    if (bonusDefTour > 0 && armure) {
-        armure->utiliser();
-    }
 
-    float multi     = calcMultiplier();
-    int dmgBrut     = static_cast<int>(monster.getAtk() * multi);
-    int reduction   = dmgBrut * bonusDefTour / 100;
-    int dmgFinal    = max(0, dmgBrut - reduction);
+    float multi   = calcMultiplier();
+    int   dmgBrut = static_cast<int>(monster.getAtk() * multi);
+    int   reduction = dmgBrut * bonusDefTour / 100;
+    int   dmgFinal  = max(0, dmgBrut - reduction);
+
+    // Consomme l'usure de l'armure si elle a absorbe quelque chose
+    if (reduction > 0 && player.getArmureEquipee()) {
+        player.getArmureEquipee()->utiliser();
+    }
 
     player.takeDamage(dmgFinal);
 
@@ -85,28 +112,24 @@ bool Combat::monsterTurn() {
     } else if (multi > 1.7f) {
         cout << monster.getName() << " a fait un coup critique ! ";
         cout << "Vous subissez " << dmgFinal << " degats";
-        if (reduction > 0) {
-            cout << " (" << dmgBrut << " bruts - " << reduction
-                 << " grace a l'armure)";
-        }
+        if (reduction > 0)
+            cout << " (" << dmgBrut << " bruts - " << reduction << " absorbes par l'armure)";
         cout << ".\nHP restants : " << player.getHp() << "/" << player.getHpMax() << "\n";
     } else {
         cout << monster.getName() << " vous inflige " << dmgFinal << " degats";
-        if (reduction > 0) {
-            cout << " (" << dmgBrut << " bruts - " << reduction
-                 << " grace a l'armure)";
-        }
+        if (reduction > 0)
+            cout << " (" << dmgBrut << " bruts - " << reduction << " absorbes par l'armure)";
         cout << ".\nHP restants : " << player.getHp() << "/" << player.getHpMax() << "\n";
     }
-
-    return !player.isAlive();
 }
 
+// ─── FIGHT ────────────────────────────────────────────────────────────────────
+// L'arme est consommee (durabilite -1) au moment de l'attaque.
 bool Combat::fight() {
     bonusAtkTour = player.getEquippedAtkBonus();
-    Arme* arme = player.getArmeEquipee();
-    if (bonusAtkTour > 0 && arme) {
-        arme->utiliser();
+
+    if (bonusAtkTour > 0 && player.getArmeEquipee()) {
+        player.getArmeEquipee()->utiliser(); // consomme 1 durabilite
     }
 
     int dmgBase  = calcDamage(monster.getHpMax());
@@ -117,9 +140,8 @@ bool Combat::fight() {
         cout << "Vous ratez votre attaque !\n";
     } else {
         cout << "Vous infligez " << dmgTotal << " degats";
-        if (bonusAtkTour > 0) {
-            cout << " (" << dmgBase << " aleatoire + " << bonusAtkTour << " via l'arme equipee)";
-        }
+        if (bonusAtkTour > 0)
+            cout << " (" << dmgBase << " aleatoire + " << bonusAtkTour << " via l'arme)";
         cout << " a " << monster.getName() << ".\n";
         cout << monster.getName() << " HP : " << monster.getHp()
              << "/" << monster.getHpMax() << "\n";
@@ -128,6 +150,7 @@ bool Combat::fight() {
     return !monster.isAlive();
 }
 
+// ─── ACT ──────────────────────────────────────────────────────────────────────
 void Combat::doAct() {
     const vector<int>& ids = monster.getActIds();
     int maxActs = monster.getMaxActCount();
@@ -158,6 +181,7 @@ void Combat::doAct() {
          << monster.getMercy() << "/" << monster.getMercyGoal() << "\n";
 }
 
+// ─── ITEM : ne consomme pas le tour ──────────────────────────────────────────
 void Combat::menuItem() {
     player.displayInventory();
     cout << "Choisir un item (index, -1 pour annuler) > ";
@@ -165,28 +189,18 @@ void Combat::menuItem() {
     int idx = 0;
     cin >> idx;
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    if (idx < 0) {
-        cout << "Annule.\n";
-        return;
-    }
+    if (idx < 0) { cout << "Annule.\n"; return; }
 
-    if (player.useItem(idx, bonusAtkTour, bonusDefTour)) {
-        if (bonusAtkTour > 0) {
-            cout << "  -> Arme equipee pour ce combat et les suivants.\n";
-        }
-        if (bonusDefTour > 0) {
-            cout << "  -> Armure equipee pour ce combat et les suivants.\n";
-        }
-    }
+    player.useItem(idx, bonusAtkTour, bonusDefTour);
 }
 
+// ─── MERCY ────────────────────────────────────────────────────────────────────
 bool Combat::doMercy() {
     if (!monster.isMercyFull()) {
         cout << "La jauge Mercy n'est pas pleine ("
              << monster.getMercy() << "/" << monster.getMercyGoal() << ").\n";
         return false;
     }
-
     cout << monster.getName() << " accepte votre grace et s'en va.\n";
     monster.setKilledResult(false);
     player.addSpare();

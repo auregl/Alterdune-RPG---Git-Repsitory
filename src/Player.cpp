@@ -9,12 +9,10 @@ Player::Player(const string& name)
 
 Player::~Player() {
     for (Utilisable* u : inventory) delete u;
-    // armeEquipee et armureEquipee sont dans l'inventaire, deja supprimes
 }
 
 int Player::getKills()  const { return kills; }
 int Player::getSpared() const { return spared; }
-
 void Player::addKill()  { ++kills; }
 void Player::addSpare() { ++spared; }
 
@@ -22,8 +20,8 @@ void Player::addItem(Utilisable* item) {
     inventory.push_back(item);
 }
 
-// ─── Equipe une arme depuis l'inventaire ──────────────────────────────────────
-// Le bonus ATK est applique pour le tour en cours (passe par reference depuis Combat)
+// ─── Equipe une arme ─────────────────────────────────────────────────────────
+// Ne consomme PAS la durabilite : c'est fight() qui le fait au moment de l'attaque.
 void Player::equiperArme(int index, int& bonusAtk) {
     bonusAtk = 0;
 
@@ -31,7 +29,6 @@ void Player::equiperArme(int index, int& bonusAtk) {
         cout << "Index invalide.\n";
         return;
     }
-
     Arme* a = dynamic_cast<Arme*>(inventory[index]);
     if (!a) {
         cout << "Cet item n'est pas une arme.\n";
@@ -42,20 +39,19 @@ void Player::equiperArme(int index, int& bonusAtk) {
         return;
     }
 
-    // Si une arme etait deja equipee, on la remet en inventaire (elle n'est pas perdue)
-    if (armeEquipee) {
-        cout << "[" << armeEquipee->getName() << " desequipee et remise en inventaire.]\n";
-    }
+    if (armeEquipee && armeEquipee != a)
+        cout << "[" << armeEquipee->getName() << " desequipee.]\n";
 
     armeEquipee = a;
-    bonusAtk = a->getBonusAtk(); // remplace (pas de cumul)
+    bonusAtk    = a->getBonusAtk();
 
     cout << "Vous equipez " << a->getName()
-         << " ! (ATK +" << a->getBonusAtk()
+         << " (ATK +" << a->getBonusAtk()
          << " | Durabilite : " << a->getDurabilite() << ")\n";
 }
 
-// ─── Equipe une armure depuis l'inventaire ────────────────────────────────────
+// ─── Equipe une armure ───────────────────────────────────────────────────────
+// Ne consomme PAS l'usure : c'est monsterTurn() qui le fait quand elle absorbe.
 void Player::equiperArmure(int index, int& bonusDef) {
     bonusDef = 0;
 
@@ -63,7 +59,6 @@ void Player::equiperArmure(int index, int& bonusDef) {
         cout << "Index invalide.\n";
         return;
     }
-
     Equipement* e = dynamic_cast<Equipement*>(inventory[index]);
     if (!e) {
         cout << "Cet item n'est pas une armure.\n";
@@ -74,29 +69,31 @@ void Player::equiperArmure(int index, int& bonusDef) {
         return;
     }
 
-    if (armureEquipee) {
-        cout << "[" << armureEquipee->getName() << " desequipee et remise en inventaire.]\n";
-    }
+    if (armureEquipee && armureEquipee != e)
+        cout << "[" << armureEquipee->getName() << " desequipee.]\n";
 
     armureEquipee = e;
-    bonusDef = e->getBonusDefPct(); // remplace (pas de cumul)
+    bonusDef      = e->getBonusDefPct();
 
     cout << "Vous equipez " << e->getName()
-         << " ! (DEF +" << e->getBonusDefPct()
+         << " (DEF +" << e->getBonusDefPct()
          << "% | Usure : " << e->getUsure()
          << "/" << e->getSeuilMax() << ")\n";
 }
 
-// ─── Utilise une potion de l'inventaire ──────────────────────────────────────
+// ─── Desequipe apres utilisation (slot -> nullptr, item reste en inventaire) ─
+void Player::desequiperArme()   { armeEquipee   = nullptr; }
+void Player::desequiperArmure() { armureEquipee = nullptr; }
+
+// ─── Utilise une potion ──────────────────────────────────────────────────────
 bool Player::utiliserPotion(int index) {
     if (index < 0 || index >= (int)inventory.size()) {
         cout << "Index invalide.\n";
         return false;
     }
-
     Potion* p = dynamic_cast<Potion*>(inventory[index]);
     if (!p) {
-        cout << "Cet item n'est pas une potion. Choisissez une potion pour soigner.\n";
+        cout << "Cet item n'est pas une potion.\n";
         return false;
     }
     if (!p->estDisponible()) {
@@ -113,22 +110,15 @@ bool Player::utiliserPotion(int index) {
     return true;
 }
 
+// ─── Routeur generique (utilise par Game::showItems et Combat::menuItem) ─────
 bool Player::useItem(int index, int& bonusAtk, int& bonusDef) {
     bonusAtk = 0;
     bonusDef = 0;
 
     string type = getItemType(index);
-    if (type == "WEAPON") {
-        equiperArme(index, bonusAtk);
-        return true;
-    }
-    if (type == "ARMOR") {
-        equiperArmure(index, bonusDef);
-        return true;
-    }
-    if (type == "HEAL") {
-        return utiliserPotion(index);
-    }
+    if (type == "WEAPON") { equiperArme(index, bonusAtk);   return true; }
+    if (type == "ARMOR")  { equiperArmure(index, bonusDef); return true; }
+    if (type == "HEAL")   { return utiliserPotion(index); }
 
     cout << "Index invalide.\n";
     return false;
@@ -144,7 +134,6 @@ int Player::getEquippedDefBonus() const {
     return armureEquipee->getBonusDefPct();
 }
 
-// ─── Affichage inventaire ─────────────────────────────────────────────────────
 void Player::displayInventory() const {
     cout << "=== Inventaire ===\n";
     if (inventory.empty()) { cout << "(vide)\n"; return; }
@@ -153,12 +142,11 @@ void Player::displayInventory() const {
         inventory[i]->afficherDetails();
     }
     if (armeEquipee)
-        cout << "  [Arme equipee : " << armeEquipee->getName() << "]\n";
+        cout << "  [Arme equipee   : " << armeEquipee->getName() << "]\n";
     if (armureEquipee)
         cout << "  [Armure equipee : " << armureEquipee->getName() << "]\n";
 }
 
-// ─── Affichage stats ──────────────────────────────────────────────────────────
 void Player::displayStats() const {
     cout << "=== Statistiques ===\n";
     cout << "Nom      : " << name   << "\n";

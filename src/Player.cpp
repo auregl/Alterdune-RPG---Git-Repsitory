@@ -20,7 +20,7 @@ void Player::addItem(Utilisable* item) {
     inventory.push_back(item);
 }
 
-// ─── Equipe une arme ─────────────────────────────────────────────────────────
+// Equipe une arme :
 // Ne consomme PAS la durabilite : c'est fight() qui le fait au moment de l'attaque.
 void Player::equiperArme(int index, int& bonusAtk) {
     bonusAtk = 0;

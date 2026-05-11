@@ -1,6 +1,7 @@
 #include "Game.h"
 #include "Combat.h"
 #include "FileLoader.h"
+#include "InputUtils.h"
 
 #include <cstdlib>
 #include <iostream>
@@ -47,9 +48,7 @@ void Game::mainMenu() {
     while (true) {
         cout << "> ";
 
-        int choice = 0;
-        cin >> choice;
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        int choice = safeReadInt(0);
 
         switch (choice) {
             case 1:
@@ -95,9 +94,6 @@ void Game::displayMenu() const {
 }
 
 // ─── Combat ──────────────────────────────────────────────────────────────────
-// On clone le monstre pour que les monstres originaux restent intacts
-// et puissent etre rencontres plusieurs fois. Le clone est transfere
-// au Bestiary en cas de victoire, ou delete sinon.
 void Game::startCombat() {
     uniform_int_distribution<int> dist(0, static_cast<int>(monsters.size()) - 1);
     Monster* modele    = monsters[dist(gameRng)];
@@ -107,7 +103,7 @@ void Game::startCombat() {
     bool won = combat.run();
 
     if (won) {
-        bestiary.add(combatant); // Bestiary prend ownership du clone
+        bestiary.add(combatant);
         cout << "Victoire ! Total : "
              << (player.getKills() + player.getSpared()) << "/10\n";
     } else {
@@ -127,16 +123,11 @@ void Game::showStats() {
 }
 
 // ─── Menu items hors combat ───────────────────────────────────────────────────
-// Potions  : soignent immediatement.
-// Armes    : equipees dans le slot du joueur, bonus actif au prochain combat.
-// Armures  : idem.
 void Game::showItems() {
     player.displayInventory();
     cout << "Choisir un item (index ou -1 pour annuler) > ";
 
-    int idx = -1;
-    cin >> idx;
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    int idx = safeReadInt(-1);
 
     if (idx < 0) { cout << "Annule.\n"; return; }
 
